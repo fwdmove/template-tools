@@ -226,10 +226,13 @@ export function PhotoSlot({
   placeholder,
   children,
   dark = true,
+  fallback,
 }: {
   id: string;
   label: string;
   style: CSSProperties;
+  /** Image shown (unmovable) while this slot has no photo of its own. */
+  fallback?: string;
   imgStyle?: CSSProperties;
   fit?: 'cover' | 'contain';
   filter?: string;
@@ -248,6 +251,7 @@ export function PhotoSlot({
   );
   return (
     <div
+      data-slot={id}
       className={'slot' + (selected === id ? ' sel' : '')}
       style={{ position: 'absolute', overflow: 'hidden', touchAction: 'none', cursor: v.src ? 'move' : 'pointer', ...style }}
       {...handlers}
@@ -257,9 +261,9 @@ export function PhotoSlot({
         if (!v.src && !moved.current) pickFile(id);
       }}
     >
-      {v.src ? (
+      {v.src || fallback ? (
         <img
-          src={v.src}
+          src={v.src || fallback}
           draggable={false}
           alt=""
           style={{
@@ -269,7 +273,7 @@ export function PhotoSlot({
             width: '100%',
             height: '100%',
             objectFit: fit,
-            transform: `translate(${v.x}px, ${v.y}px) scale(${v.scale}) rotate(${v.rot}deg)`,
+            transform: v.src ? `translate(${v.x}px, ${v.y}px) scale(${v.scale}) rotate(${v.rot}deg)` : undefined,
             filter,
             pointerEvents: 'none',
             userSelect: 'none',
@@ -328,6 +332,7 @@ export function TextSlot({
   return (
     <div
       ref={outer}
+      data-slot={id}
       className={'slot txt' + (selected === id ? ' sel' : '')}
       style={{
         position: 'absolute',

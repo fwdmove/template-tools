@@ -14,7 +14,7 @@ export interface TemplateDef {
   Controls?: FC;
   /** Show the "use your own background screenshot" option. */
   allowBg?: boolean;
-  thumb: { bg: string; emoji: string };
+  thumb: { bg: string; emoji: string; img?: string };
 }
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {

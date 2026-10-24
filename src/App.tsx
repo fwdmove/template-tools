@@ -84,8 +84,8 @@ export default function App() {
         <main className="gallery">
           {TEMPLATES.filter((t) => t.tab === route.tab).map((t) => (
             <a key={t.id} className="card" href={`#/${t.tab}/${t.id}`}>
-              <div className="card-art" style={{ background: t.thumb.bg }}>
-                <span>{t.thumb.emoji}</span>
+              <div className="card-art" style={{ background: t.thumb.img ? `center/cover url(${t.thumb.img})` : t.thumb.bg }}>
+                {!t.thumb.img && <span>{t.thumb.emoji}</span>}
               </div>
               <div className="card-body">
                 <h3>{t.title}</h3>

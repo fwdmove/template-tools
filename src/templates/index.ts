@@ -1,6 +1,7 @@
 import type { TabId, TemplateDef } from '../core/ui';
 import { chairs, endgame, willReturn } from './marvel';
-import { fortnite, lego, mua3, smash, wwe2k15 } from './games';
+import { fortnite } from './games';
+import { lego, mua3, smash, wwe2k15 } from './rosters';
 import { aew, allStar, nbaJersey, wweCover } from './sports';
 import { bballCard, pokemon, wweCard } from './cards';
 
