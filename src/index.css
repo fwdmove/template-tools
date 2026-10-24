@@ -88,3 +88,5 @@ button.danger { color: #ff8080; }
 .modal { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.8); display: grid; place-items: center; padding: 16px; }
 .modal-card { background: var(--panel); border-radius: 16px; padding: 14px; max-width: min(900px, 100%); max-height: 100%; overflow: auto; display: flex; flex-direction: column; gap: 12px; }
 .modal-card img { max-width: 100%; max-height: 62dvh; object-fit: contain; border-radius: 8px; align-self: center; -webkit-touch-callout: default; }
+
+.stage.has-bg > div { background: none !important; }

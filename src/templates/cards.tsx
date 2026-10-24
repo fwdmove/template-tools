@@ -135,7 +135,7 @@ function Pokemon() {
         <div style={{ position: 'absolute', left: stage === 'basic' ? 26 : 90, top: 46, display: 'flex', alignItems: 'baseline', gap: 6 }}>
           <TextSlot id="name" label="Name" def="Pikachu" style={{ position: 'relative', fontSize: 50, fontWeight: 700, color: ink, textShadow: shadow, fontFamily: GILL, letterSpacing: '-0.01em' }} />
           {isEx && (
-            <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 50, fontStyle: 'italic', background: 'linear-gradient(180deg,#fff,#c9ccd1 50%,#8a9099)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent', WebkitTextStroke: '2px #222', letterSpacing: '-0.04em' }}>ex</span>
+            <span style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: 50, fontStyle: 'italic', color: '#e6e8ec', WebkitTextStroke: '2px #222', paintOrder: 'stroke', textShadow: '0 3px 0 #8a9099', letterSpacing: '-0.04em' }}>ex</span>
           )}
         </div>
         <div style={{ position: 'absolute', right: 22, top: 44, display: 'flex', alignItems: 'center', gap: 6, color: ink, textShadow: shadow, fontFamily: GILL, fontWeight: 700 }}>

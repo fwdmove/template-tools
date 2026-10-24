@@ -34,7 +34,7 @@ function StageView({ def, stageRef }: { def: TemplateDef; stageRef: React.RefObj
     <div ref={box} className="stage-box" onClick={() => select(null)}>
       <div style={{ width: w * scale, height: h * scale, position: 'relative', margin: '0 auto' }}>
         <div style={{ transform: `scale(${scale})`, transformOrigin: '0 0', position: 'absolute', left: 0, top: 0 }}>
-          <div ref={stageRef} className="stage" style={{ width: w, height: h }}>
+          <div ref={stageRef} className={'stage' + (state.opts.__bg ? ' has-bg' : '')} style={{ width: w, height: h }}>
             {state.opts.__bg && (
               <img
                 src={state.opts.__bg}
@@ -125,6 +125,12 @@ function SelectedPanel() {
       )}
       {m.kind === 'layer' && (
         <>
+          <Field label="Left / right">
+            <input type="range" min={-1500} max={1500} step={1} value={v.x ?? 0} onChange={(e) => setSlot(m.id, { x: +e.target.value })} />
+          </Field>
+          <Field label="Up / down">
+            <input type="range" min={-1500} max={1500} step={1} value={v.y ?? 0} onChange={(e) => setSlot(m.id, { y: +e.target.value })} />
+          </Field>
           <Field label={`Size: ${Math.round((v.scale ?? 1) * 100)}%`}>
             <input type="range" min={0.1} max={4} step={0.01} value={v.scale ?? 1} onChange={(e) => setSlot(m.id, { scale: +e.target.value })} />
           </Field>
@@ -144,8 +150,14 @@ function SlotList() {
   const { metas, state, setSlot, select, selected, pickFile } = useEditor();
   const photos = metas.filter((m) => m.kind === 'photo');
   const texts = metas.filter((m) => m.kind === 'text');
+  const layers = metas.filter((m) => m.kind === 'layer');
   return (
     <>
+      {layers.map((m) => (
+        <button key={m.id} className={selected === m.id ? 'on' : ''} onClick={() => select(m.id)}>
+          Adjust: {m.label}
+        </button>
+      ))}
       {texts.length > 0 && (
         <details className="panel" open={texts.length <= 14}>
           <summary>Names &amp; text ({texts.length})</summary>
@@ -194,6 +206,13 @@ function SlotList() {
 
 function ExportModal({ url, name, onClose }: { url: string; name: string; onClose: () => void }) {
   const [msg, setMsg] = useState('');
+  // Build the file up front so the share sheet opens straight from the tap (iOS rejects it after an await).
+  const [file, setFile] = useState<File | null>(null);
+  useEffect(() => {
+    fetch(url)
+      .then((r) => r.blob())
+      .then((b) => setFile(new File([b], name, { type: 'image/png' })));
+  }, [url, name]);
   const download = () => {
     const a = document.createElement('a');
     a.href = url;
@@ -202,9 +221,7 @@ function ExportModal({ url, name, onClose }: { url: string; name: string; onClos
   };
   const share = async () => {
     try {
-      const blob = await (await fetch(url)).blob();
-      const file = new File([blob], name, { type: 'image/png' });
-      if (navigator.canShare?.({ files: [file] })) {
+      if (file && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file] });
         setMsg('Choose “Save Image” to put it in Photos.');
       } else {
@@ -262,7 +279,7 @@ function Inner({ def, onBack, onReset }: { def: TemplateDef; onBack: () => void;
         filter: (n: HTMLElement) => !n.classList?.contains('no-export'),
       };
       // Safari often drops images on the first pass; a warm-up render fixes it.
-      if (isSafari) await toPng(node, opts);
+      if (isSafari || isApple) await toPng(node, opts);
       const url = await toPng(node, opts);
       setOut(url);
     } catch (e) {

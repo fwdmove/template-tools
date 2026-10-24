@@ -220,18 +220,14 @@ export function AvengersA({ size = 200, color = '#d9d9d9' }: { size?: number; co
 }
 
 function EndgameLogo({ w = 760, color = '#cfd2d6' }: { w?: number; color?: string }) {
-  const metal = `linear-gradient(180deg, #ffffff 0%, ${color} 45%, #6b6f76 55%, #e6e8ea 100%)`;
   return (
     <div style={{ width: w, textAlign: 'center', fontFamily: "'Russo One', sans-serif", lineHeight: 1 }}>
       <div
         style={{
           fontSize: w * 0.15,
           letterSpacing: '0.06em',
-          backgroundImage: metal,
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          color: 'transparent',
-          filter: 'drop-shadow(0 2px 2px rgba(0,0,0,.6))',
+          color: color,
+          textShadow: '0 -2px 0 #ffffff, 0 3px 0 #6b6f76, 0 6px 10px rgba(0,0,0,.7)',
         }}
       >
         AVENGERS

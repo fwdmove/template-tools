@@ -94,7 +94,7 @@ export function Jersey({ body, text, trim, wordmark, number, font, w = 600 }: { 
 }
 
 function NbaJersey() {
-  const { state } = useEditor();
+  const { state, selected } = useEditor();
   const [team] = useOpt('team', 'Chicago Bulls');
   const [ed] = useOpt('edition', 'icon');
   const [num] = useOpt('number', '23');
@@ -129,7 +129,8 @@ function NbaJersey() {
           <Jersey body={body} text={text} trim={trim} wordmark={(wm || t[1]).toUpperCase()} number={num} font={font} />
         )}
       </Layer>
-      <PhotoSlot id="overlay" label="Arms / head on top (transparent PNG, optional)" fit="contain" placeholder={false} style={{ inset: 0, pointerEvents: state.slots.overlay?.src ? 'auto' : 'none' }} />
+      {/* Only catches taps while selected (pick it from the Photos list), so the jersey stays draggable. */}
+      <PhotoSlot id="overlay" label="Arms / head on top (transparent PNG, optional)" fit="contain" placeholder={false} style={{ inset: 0, pointerEvents: selected === 'overlay' ? 'auto' : 'none' }} />
     </div>
   );
 }
@@ -177,7 +178,7 @@ function ResetColors() {
 function AewLogo({ size = 220 }: { size?: number }) {
   return (
     <div style={{ fontFamily: "'Archivo Black', sans-serif", fontSize: size, lineHeight: 0.8, letterSpacing: '-0.06em', color: '#fff', transform: 'skewX(-14deg)', textShadow: '6px 6px 0 #000' }}>
-      <span style={{ background: 'linear-gradient(180deg,#f9e7a6,#c79a3a 55%,#8a6420)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>AEW</span>
+      <span style={{ color: '#d8ae52', textShadow: '0 -3px 0 #f9e7a6, 0 3px 0 #8a6420, 6px 8px 0 #000' }}>AEW</span>
     </div>
   );
 }
@@ -387,7 +388,7 @@ function WweCover() {
       {/* logo */}
       {s.family === 'svr' ? (
         <div style={{ position: 'absolute', left: 0, right: 0, top: 1000, textAlign: 'center', fontFamily: "'Russo One', sans-serif", color: '#fff', lineHeight: 1 }}>
-          <div style={{ fontSize: 96, letterSpacing: '0.02em', textShadow: `0 0 20px ${s.glow}, 0 6px 0 #000`, background: 'linear-gradient(180deg,#fff,#b8c0cc 55%,#6b7380)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>SMACKDOWN</div>
+          <div style={{ fontSize: 96, letterSpacing: '0.02em', color: '#e6eaf0', textShadow: `0 3px 0 #6b7380, 0 0 20px ${s.glow}, 0 8px 0 #000` }}>SMACKDOWN</div>
           <div style={{ fontSize: 50, color: s.accent, margin: '4px 0' }}>vs</div>
           <div style={{ fontSize: 96, color: s.accent, textShadow: '0 6px 0 #000' }}>
             RAW <span style={{ color: '#fff' }}>{s.year}</span>
