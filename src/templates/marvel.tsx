@@ -252,9 +252,11 @@ function Billing() {
 }
 
 function EndgamePoster() {
-  const [style] = useOpt('style', 'fallen-bw');
+  const [style] = useOpt('style', 'fallen');
   const [date] = useOpt('date', '04.26');
-  const bw = style === 'fallen-bw';
+  // older saves used 'fallen-bw' / 'fallen-color' as the style
+  const [photo] = useOpt('photo', style === 'fallen-color' || style === 'character' ? 'color' : 'bw');
+  const bw = photo === 'bw';
   const fallen = style !== 'character';
   return (
     <div style={{ position: 'absolute', inset: 0, background: fallen ? '#0b0b0d' : 'radial-gradient(ellipse at 50% 30%, #4b2c7a, #1a0f33 60%, #07040f)' }}>
@@ -289,11 +291,26 @@ function EndgamePoster() {
   );
 }
 
+function EndgamePhotoColor() {
+  const [style] = useOpt('style', 'fallen');
+  return (
+    <OptSelect
+      k="photo"
+      label="Your picture"
+      def={style === 'fallen-color' || style === 'character' ? 'color' : 'bw'}
+      options={[
+        ['bw', 'Black & white (dusted)'],
+        ['color', 'Color (survivor)'],
+      ]}
+    />
+  );
+}
+
 export const endgame: TemplateDef = {
   id: 'endgame-poster',
   tab: 'marvel',
   title: 'Endgame Character Poster',
-  blurb: 'The one-person Avengers: Endgame posters — black & white “Avenge the Fallen” or color.',
+  blurb: 'The one-person Avengers: Endgame posters. Your picture can be black & white or color.',
   size: () => [1080, 1600],
   Render: EndgamePoster,
   thumb: { bg: 'linear-gradient(135deg,#3c2a66,#0b0b0d)', emoji: '🎬' },
@@ -302,13 +319,13 @@ export const endgame: TemplateDef = {
       <OptSelect
         k="style"
         label="Poster style"
-        def="fallen-bw"
+        def="fallen"
         options={[
-          ['fallen-bw', 'Avenge the Fallen — black & white (dusted)'],
-          ['fallen-color', 'Avenge the Fallen — color (survivor)'],
+          ['fallen', 'Avenge the Fallen'],
           ['character', 'Character poster with logo'],
         ]}
       />
+      <EndgamePhotoColor />
       <OptText k="date" label="Date" def="04.26" />
     </>
   ),

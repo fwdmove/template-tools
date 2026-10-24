@@ -55,6 +55,29 @@ export function Crop({ k: key, box, scale, clean = true, dir = 'rosters', size }
   );
 }
 
+/** The matching piece of the empty screen, placed inside a slot so cut-out photos don't show the old character. */
+function EmptyBehind({ k: key, slot }: { k: string; slot: CSSProperties }) {
+  const [W, H] = sizeFor(key);
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `url(/rosters/${key}-empty.jpg)`,
+        backgroundSize: `${W}px ${H}px`,
+        backgroundPosition: `${-Number(slot.left)}px ${-Number(slot.top)}px`,
+        pointerEvents: 'none',
+      }}
+    />
+  );
+}
+
+/** A photo slot over one shape of a roster screen, with the empty screen behind any photo. */
+function RosterSlot({ k: key, shape, scale, ...rest }: { k: string; shape: Shape; scale: number; id: string; label: string; fallback?: string; children?: ReactNode }) {
+  const st = shapeStyle(shape, scale);
+  return <PhotoSlot {...rest} style={st} placeholder={false} backdrop={<EmptyBehind k={key} slot={st} />} />;
+}
+
 /** True once the user has changed this slot in any way. */
 export function useTouched() {
   const { state } = useEditor();
@@ -86,17 +109,7 @@ export function SwapText({ id, label, def, style, patch, fit = true, force }: { 
 function CellSlots({ k: key, prefix, scale, labelFor, skip }: { k: string; prefix: string; scale: number; labelFor: (i: number) => string; skip?: number }) {
   return (
     <>
-      {G[key].cells.map((c, i) =>
-        i === skip ? null : (
-          <PhotoSlot
-            key={i}
-            id={`${prefix}c${i}`}
-            label={labelFor(i)}
-            style={shapeStyle(c, scale)}
-            placeholder={false}
-          />
-        ),
-      )}
+      {G[key].cells.map((c, i) => (i === skip ? null : <RosterSlot key={i} k={key} shape={c} scale={scale} id={`${prefix}c${i}`} label={labelFor(i)} />))}
     </>
   );
 }
@@ -176,10 +189,10 @@ function LegoRoster() {
     <div style={{ position: 'absolute', inset: 0 }}>
       <Shot k={fr} empty={clear} />
       <CellSlots k={fr} prefix={p} scale={k} skip={g.sel ? g.selIndex : undefined} labelFor={(i) => `Circle ${i + 1}`} />
-      {g.sel && <PhotoSlot id={p + 'sel'} label="Selected circle (in the grid)" style={shapeStyle(g.sel, k)} placeholder={false} />}
-      {g.big && <PhotoSlot id={p + 'big'} label="Big circle (top)" style={shapeStyle(g.big, k)} placeholder={false} fallback={selPhoto} />}
-      {g.p1 && <PhotoSlot id={p + 'p1'} label="Player 1 icon" style={shapeStyle(g.p1, k)} placeholder={false} fallback={selPhoto} />}
-      {g.p2 && <PhotoSlot id={p + 'p2'} label="Player 2 icon" style={shapeStyle(g.p2, k)} placeholder={false} fallback={p2Photo} />}
+      {g.sel && <RosterSlot k={fr} shape={g.sel} scale={k} id={p + 'sel'} label="Selected circle (in the grid)" />}
+      {g.big && <RosterSlot k={fr} shape={g.big} scale={k} id={p + 'big'} label="Big circle (top)" fallback={selPhoto} />}
+      {g.p1 && <RosterSlot k={fr} shape={g.p1} scale={k} id={p + 'p1'} label="Player 1 icon" fallback={selPhoto} />}
+      {g.p2 && <RosterSlot k={fr} shape={g.p2} scale={k} id={p + 'p2'} label="Player 2 icon" fallback={p2Photo} />}
       {n && (
         <SwapText
           id={p + 'name'}
@@ -380,14 +393,9 @@ function Mua3() {
         const has = !!src('team' + i);
         return (
           <div key={i}>
-            <PhotoSlot
-              id={'team' + i}
-              label={`Team card ${i + 1} picture`}
-              placeholder={false}
-              style={shapeStyle(shape, k)}
-            >
+            <RosterSlot k="mua3" shape={shape} scale={k} id={'team' + i} label={`Team card ${i + 1} picture`}>
               {has && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '35%', background: 'linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.55))', pointerEvents: 'none' }} />}
-            </PhotoSlot>
+            </RosterSlot>
             {has && (
               <>
                 <TextSlot id={'tag' + i} label={`Team card ${i + 1} tag`} def={t.tag} style={{ ...label, left: (t.x + 10) * k, top: 755 * k, fontSize: 32 * k, color: t.color }} />

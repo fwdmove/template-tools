@@ -53,9 +53,18 @@ export async function fileToDataUrl(file: File, max = 1800): Promise<string> {
     const c = document.createElement('canvas');
     c.width = Math.round(img.naturalWidth * k);
     c.height = Math.round(img.naturalHeight * k);
-    c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-    const png = /png|webp|gif/.test(file.type);
-    return c.toDataURL(png ? 'image/png' : 'image/jpeg', 0.92);
+    const ctx = c.getContext('2d')!;
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    // Keep PNG whenever the picture has any see-through pixels (file.type can be blank or wrong).
+    const data = ctx.getImageData(0, 0, c.width, c.height).data;
+    let transparent = false;
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] < 250) {
+        transparent = true;
+        break;
+      }
+    }
+    return c.toDataURL(transparent ? 'image/png' : 'image/jpeg', 0.92);
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -227,12 +236,15 @@ export function PhotoSlot({
   children,
   dark = true,
   fallback,
+  backdrop,
 }: {
   id: string;
   label: string;
   style: CSSProperties;
   /** Image shown (unmovable) while this slot has no photo of its own. */
   fallback?: string;
+  /** Drawn under the photo so see-through (cut-out) pictures don't show what was there before. */
+  backdrop?: ReactNode;
   imgStyle?: CSSProperties;
   fit?: 'cover' | 'contain';
   filter?: string;
@@ -261,6 +273,7 @@ export function PhotoSlot({
         if (!v.src && !moved.current) pickFile(id);
       }}
     >
+      {(v.src || fallback) && backdrop}
       {v.src || fallback ? (
         <img
           src={v.src || fallback}
