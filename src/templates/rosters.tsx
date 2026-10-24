@@ -30,14 +30,14 @@ function shapeStyle(s: Shape, k: number): CSSProperties {
 }
 
 /** The screenshot itself, full size. */
-function Shot({ k: key, clean }: { k: string; clean?: boolean }) {
-  return <img src={`/rosters/${key}${clean ? '-clean' : ''}.jpg`} alt="" draggable={false} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
+export function Shot({ k: key, clean, empty, dir = 'rosters' }: { k: string; clean?: boolean; empty?: boolean; dir?: string }) {
+  return <img src={`/${dir}/${key}${empty ? '-empty' : clean ? '-clean' : ''}.jpg`} alt="" draggable={false} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />;
 }
 
 /** A rectangle of another copy of the screenshot (clean or original), e.g. to hide old text or re-draw UI on top. */
-function Crop({ k: key, box, scale, clean = true }: { k: string; box: [number, number, number, number]; scale: number; clean?: boolean }) {
+export function Crop({ k: key, box, scale, clean = true, dir = 'rosters', size }: { k: string; box: [number, number, number, number]; scale: number; clean?: boolean; dir?: string; size?: [number, number] }) {
   const [x0, y0, x1, y1] = box;
-  const [W, H] = sizeFor(key);
+  const [W, H] = size ?? sizeFor(key);
   return (
     <div
       style={{
@@ -46,7 +46,7 @@ function Crop({ k: key, box, scale, clean = true }: { k: string; box: [number, n
         top: y0 * scale,
         width: (x1 - x0) * scale,
         height: (y1 - y0) * scale,
-        backgroundImage: `url(/rosters/${key}${clean ? '-clean' : ''}.jpg)`,
+        backgroundImage: `url(/${dir}/${key}${clean ? '-clean' : ''}.jpg)`,
         backgroundSize: `${W}px ${H}px`,
         backgroundPosition: `${-x0 * scale}px ${-y0 * scale}px`,
         pointerEvents: 'none',
@@ -56,17 +56,17 @@ function Crop({ k: key, box, scale, clean = true }: { k: string; box: [number, n
 }
 
 /** True once the user has changed this slot in any way. */
-function useTouched() {
+export function useTouched() {
   const { state } = useEditor();
   return (id: string) => state.slots[id] !== undefined && Object.keys(state.slots[id]).length > 0;
 }
-function useSrc() {
+export function useSrc() {
   const { state } = useEditor();
   return (id: string): string | undefined => state.slots[id]?.src;
 }
 
 /** Text that stays invisible (the original is in the screenshot) until it is edited. */
-function SwapText({ id, label, def, style, patch, fit = true, force }: { id: string; label: string; def: string; style: CSSProperties & { fontSize: number }; patch?: ReactNode; fit?: boolean; force?: boolean }) {
+export function SwapText({ id, label, def, style, patch, fit = true, force }: { id: string; label: string; def: string; style: CSSProperties & { fontSize: number }; patch?: ReactNode; fit?: boolean; force?: boolean }) {
   const touched = useTouched()(id) || !!force;
   return (
     <>
@@ -82,8 +82,8 @@ function SwapText({ id, label, def, style, patch, fit = true, force }: { id: str
   );
 }
 
-function CellSlots({ k: key, prefix, scale, empty, labelFor, skip }: { k: string; prefix: string; scale: number; empty: string; labelFor: (i: number) => string; skip?: number }) {
-  const [clear] = useOpt('clear', false);
+/** One photo slot per portrait. "Empty out" swaps in the pre-made empty screen (scripts/empty.py) underneath. */
+function CellSlots({ k: key, prefix, scale, labelFor, skip }: { k: string; prefix: string; scale: number; labelFor: (i: number) => string; skip?: number }) {
   return (
     <>
       {G[key].cells.map((c, i) =>
@@ -93,7 +93,7 @@ function CellSlots({ k: key, prefix, scale, empty, labelFor, skip }: { k: string
             id={`${prefix}c${i}`}
             label={labelFor(i)}
             style={shapeStyle(c, scale)}
-            placeholder={clear ? <div style={{ position: 'absolute', inset: 0, background: empty }} /> : false}
+            placeholder={false}
           />
         ),
       )}
@@ -105,7 +105,6 @@ function CellSlots({ k: key, prefix, scale, empty, labelFor, skip }: { k: string
 
 type LegoCfg = {
   label: string;
-  empty: string;
   name?: { def: string; cx: number; cy: number; size: number; style: CSSProperties; box: [number, number, number, number] };
   sel?: number;
   p2From?: number;
@@ -114,7 +113,6 @@ type LegoCfg = {
 const LEGO: Record<string, LegoCfg> = {
   marvel: {
     label: 'LEGO Marvel Super Heroes',
-    empty: 'radial-gradient(circle at 50% 40%, #222, #050505 70%)',
     name: {
       def: 'Iron Man (Mark 42)',
       cx: 840,
@@ -126,7 +124,6 @@ const LEGO: Record<string, LegoCfg> = {
   },
   batman: {
     label: 'LEGO Batman 3',
-    empty: 'radial-gradient(circle at 50% 40%, #1d1d1d, #030303 70%)',
     name: {
       def: 'Batman',
       cx: 640,
@@ -136,10 +133,9 @@ const LEGO: Record<string, LegoCfg> = {
       style: { color: '#ffffff', fontFamily: "'Courier New', Courier, monospace", fontWeight: 700, letterSpacing: '0.14em', textShadow: '0 1px 2px #000' },
     },
   },
-  starwars: { label: 'LEGO Star Wars: The Skywalker Saga', empty: 'radial-gradient(circle, #3b3128, #2a231c)', sel: 26, p2From: 18 },
+  starwars: { label: 'LEGO Star Wars: The Skywalker Saga', sel: 26, p2From: 18 },
   hp: {
     label: 'LEGO Harry Potter: Years 1-4',
-    empty: 'radial-gradient(circle at 50% 40%, #1d140c, #060402 70%)',
     name: {
       def: 'Luna (Lion Head)',
       cx: 239,
@@ -151,7 +147,6 @@ const LEGO: Record<string, LegoCfg> = {
   },
   indy: {
     label: 'LEGO Indiana Jones',
-    empty: 'radial-gradient(circle at 50% 40%, #151210, #020202 70%)',
     p2From: 1,
     name: {
       def: 'Indiana Jones',
@@ -176,10 +171,11 @@ function LegoRoster() {
   const selPhoto = src(selId);
   const p2Photo = cfg.p2From !== undefined ? src(p + 'c' + cfg.p2From) : undefined;
   const n = cfg.name;
+  const [clear] = useOpt('clear', false);
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <Shot k={fr} />
-      <CellSlots k={fr} prefix={p} scale={k} empty={cfg.empty} skip={g.sel ? g.selIndex : undefined} labelFor={(i) => `Circle ${i + 1}`} />
+      <Shot k={fr} empty={clear} />
+      <CellSlots k={fr} prefix={p} scale={k} skip={g.sel ? g.selIndex : undefined} labelFor={(i) => `Circle ${i + 1}`} />
       {g.sel && <PhotoSlot id={p + 'sel'} label="Selected circle (in the grid)" style={shapeStyle(g.sel, k)} placeholder={false} />}
       {g.big && <PhotoSlot id={p + 'big'} label="Big circle (top)" style={shapeStyle(g.big, k)} placeholder={false} fallback={selPhoto} />}
       {g.p1 && <PhotoSlot id={p + 'p1'} label="Player 1 icon" style={shapeStyle(g.p1, k)} placeholder={false} fallback={selPhoto} />}
@@ -188,7 +184,8 @@ function LegoRoster() {
         <SwapText
           id={p + 'name'}
           label="Selected character name"
-          def={n.def}
+          force={clear}
+          def={clear ? '' : n.def}
           patch={<Crop k={fr} box={n.box} scale={k} />}
           style={{ ...n.style, left: 0, width: W, top: (n.cy - n.size * 0.55) * k, fontSize: n.size * k, textAlign: 'center' }}
           fit={false}
@@ -258,10 +255,11 @@ function Smash() {
   const p1 = !!src('p1') || touched('p1name');
   const p2 = !!src('p2') || touched('p2name');
   const big: CSSProperties = { fontFamily: "'Montserrat', sans-serif", fontWeight: 900, color: '#fff', WebkitTextStroke: `${4 * k}px #000`, paintOrder: 'stroke', textAlign: 'right' } as CSSProperties;
+  const [clear] = useOpt('clear', false);
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <Shot k="smash" />
-      <CellSlots k="smash" prefix="" scale={k} empty="linear-gradient(160deg,#3a3a40,#17171a)" labelFor={(i) => `Fighter ${i + 1} (${SMASH_NAMES[i]})`} />
+      <Shot k="smash" empty={clear} />
+      <CellSlots k="smash" prefix="" scale={k} labelFor={(i) => `Fighter ${i + 1} (${SMASH_NAMES[i]})`} />
       {g.cells.map((c, i) => (
         <SmashTileName key={i} i={i} shape={c as Extract<Shape, { t: 'r' }>} k={k} />
       ))}
@@ -299,13 +297,16 @@ export const smash: TemplateDef = {
 
 function Wwe2k15() {
   const k = scaleFor('wwe');
-  const src = useSrc();
+  const src0 = useSrc();
   const touched = useTouched();
+  const [clear] = useOpt('clear', false);
+  // "Empty out" clears the featured wrestler the same way adding your own photo does
+  const src = (id: string) => src0(id) || (clear && id === 'p1' ? 'clear' : undefined);
   const plate: CSSProperties = { fontFamily: "'Roboto Condensed', sans-serif", fontWeight: 700, fontStyle: 'italic', color: '#fff', textAlign: 'center' };
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <Shot k="wwe" />
-      <CellSlots k="wwe" prefix="" scale={k} empty="#0b0b0c" labelFor={(i) => `Superstar ${i + 1}`} />
+      <Shot k="wwe" empty={clear} />
+      <CellSlots k="wwe" prefix="" scale={k} labelFor={(i) => `Superstar ${i + 1}`} />
       {/* left (player 1) */}
       {src('p1') && (
         <>
@@ -317,8 +318,8 @@ function Wwe2k15() {
       <PhotoSlot id="p1" label="Player 1 wrestler (big)" placeholder={false} fit="contain" style={{ left: 232 * k, top: 18 * k, width: 306 * k, height: 285 * k }} />
       {/* the plate is re-drawn above the photo so the wrestler sits behind it, like in the game */}
       {src('p1') && <Crop k="wwe" box={[118, 303, 600, 352]} scale={k} />}
-      <SwapText id="p1name" label="Player 1 name" def="STING '91" force={!!src('p1')} patch={<Crop k="wwe" box={[336, 307, 492, 333]} scale={k} />} style={{ ...plate, left: 320 * k, width: 190 * k, top: 309 * k, fontSize: 21 * k }} />
-      <SwapText id="ovr" label="Overall rating" def="92" fit={false} force={!!src('p1')} patch={<Crop k="wwe" box={[336, 335, 372, 352]} scale={k} />} style={{ ...plate, fontStyle: 'normal', left: 344 * k, top: 335.5 * k, fontSize: 16 * k, textAlign: 'left' }} />
+      <SwapText id="p1name" label="Player 1 name" def={clear ? '' : "STING '91"} force={!!src('p1')} patch={<Crop k="wwe" box={[336, 307, 492, 333]} scale={k} />} style={{ ...plate, left: 320 * k, width: 190 * k, top: 309 * k, fontSize: 21 * k }} />
+      <SwapText id="ovr" label="Overall rating" def={clear ? '' : '92'} fit={false} force={!!src('p1')} patch={<Crop k="wwe" box={[336, 335, 372, 352]} scale={k} />} style={{ ...plate, fontStyle: 'normal', left: 344 * k, top: 335.5 * k, fontSize: 16 * k, textAlign: 'left' }} />
       {/* right (player 2 / COM) */}
       {src('p2') && (
         <>
@@ -368,17 +369,23 @@ const MUA_TEAM = [
 function Mua3() {
   const k = scaleFor('mua3');
   const src = useSrc();
+  const [clear] = useOpt('clear', false);
   const label: CSSProperties = { fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontStyle: 'italic', letterSpacing: '0.04em', textShadow: '0 2px 4px rgba(0,0,0,.8)' };
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <Shot k="mua3" />
-      <CellSlots k="mua3" prefix="" scale={k} empty="linear-gradient(180deg,#4a4a4c,#2c2c2e)" labelFor={(i) => `Roster card ${i + 1}`} />
+      <Shot k="mua3" empty={clear} />
+      <CellSlots k="mua3" prefix="" scale={k} labelFor={(i) => `Roster card ${i + 1}`} />
       {MUA_TEAM.map((t, i) => {
         const shape: Shape = { t: 'q', x: t.x, y: 612, w: 375, h: 178, sk: 10 };
         const has = !!src('team' + i);
         return (
           <div key={i}>
-            <PhotoSlot id={'team' + i} label={`Team card ${i + 1} picture`} placeholder={false} style={shapeStyle(shape, k)}>
+            <PhotoSlot
+              id={'team' + i}
+              label={`Team card ${i + 1} picture`}
+              placeholder={false}
+              style={shapeStyle(shape, k)}
+            >
               {has && <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '35%', background: 'linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.55))', pointerEvents: 'none' }} />}
             </PhotoSlot>
             {has && (
@@ -390,7 +397,8 @@ function Mua3() {
             <SwapText
               id={'name' + i}
               label={`Team card ${i + 1} name`}
-              def={t.name}
+              force={clear}
+              def={clear ? '' : t.name}
               patch={<Crop k="mua3" box={t.nameBox} scale={k} />}
               style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 700, letterSpacing: '0.06em', color: t.color, left: (t.x - 20) * k, width: 420 * k, top: 845 * k, fontSize: 36 * k, textAlign: 'center' }}
             />

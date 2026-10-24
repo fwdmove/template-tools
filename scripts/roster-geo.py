@@ -9,39 +9,39 @@ def quad(x,y,w,h,sk): return {'t':'q','x':round(x,1),'y':round(y,1),'w':w,'h':h,
 cells=[]
 for j in range(7):
     for i in range(20):
-        cells.append(circ(143+i*73.42, 459+j*73.5, 27))
+        cells.append(circ(143+i*73.42, 459+j*73.5, 28.5))
 G['marvel']=dict(src='lego-marvel.jpg', w=1680, h=1050, cells=cells,
-    big=circ(840,250,58), p1=circ(190,135,42), p2=circ(1490,135,42),
+    big=circ(840,250,62), p1=circ(190,135,42), p2=circ(1490,135,42),
     sel=circ(143,459,40), selIndex=0)
 # LEGO BATMAN 1280x725
 cells=[]
 for j in range(6):
     rng = range(25) if j<5 else range(5,20)
     for i in rng:
-        cells.append(circ(124.5+i*42.92, 324.5+j*43, 15.5))
+        cells.append(circ(124.5+i*42.92, 324.5+j*43, 16))
 G['batman']=dict(src='lego-batman.jpg', w=1280, h=725, cells=cells,
     big=circ(639,194,38), p1=circ(164,102,28), p2=circ(1115,102,28), sel=circ(124.5,324.5,23), selIndex=0)
 # LEGO INDY 1280x800
 cells=[]
 for j in range(5):
     for i in range(17):
-        cells.append(circ(256.5+i*47.94, 479.5+j*47.5, 18))
+        cells.append(circ(256.5+i*47.94, 479.5+j*47.5, 19))
 G['indy']=dict(src='lego-indy.jpg', w=1280, h=800, cells=cells,
     big=circ(640,259,68), p1=circ(144,104,37), p2=circ(1136,104,37), sel=circ(256.5,479.5,24), selIndex=0)
 # LEGO STAR WARS 1080x603
 cells=[]
 for j in range(10):
     for i in range(25):
-        cells.append(circ(114+i*35.46, 255+j*35.4, 14))
+        cells.append(circ(114+i*35.46, 255+j*35.4, 14.5))
 G['starwars']=dict(src='lego-starwars.jpg', w=1080, h=603, cells=cells,
     big=circ(539,143,62), p1=circ(45,53,30), p2=circ(1032,53,30), sel=None)
 # LEGO HP 480x360
 cells=[]
 for j in range(6):
     for i in range(19):
-        cells.append(circ(68.75+i*18.85, 158.25+j*23.25, 7.5))
+        cells.append(circ(68.75+i*18.85, 158.25+j*23.25, 8))
 for i in range(10):
-    cells.append(circ(154.5+i*18.85, 297.5, 7.5))
+    cells.append(circ(154.5+i*18.85, 297.5, 8))
 G['hp']=dict(src='lego-hp.jpg', w=480, h=360, cells=cells,
     big=circ(238,96,26), p1=circ(16,58,13), p2=circ(461,58,13), sel=circ(248.75,297.5,11), selIndex=119)
 

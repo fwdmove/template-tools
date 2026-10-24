@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from 'react';
 import { useEditor, useOpt } from './editor';
 
-export type TabId = 'marvel' | 'games' | 'sports' | 'cards';
+export type TabId = 'marvel' | 'games' | 'sports';
 
 export interface TemplateDef {
   id: string;
